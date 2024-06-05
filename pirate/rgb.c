@@ -278,15 +278,23 @@ void rgb_set_all(uint8_t r, uint8_t g, uint8_t b){
     rgb_send();
 }
 
-//function to control LED from led mode onboard demo
-#define DEMO_LED 1
+/**
+ * This function sets the LED color for a specific LED or all LEDs on the onboard demo, depending on color input.
+ * The color value should be provided in the format 0xNNGGRRBB:
+ *    - NN is either an address to target a specific LED to set (ranging from 0 to RGB_LEN),
+ *      or a value of 0xFF to imply that all LEDs should be set to the incoming color.
+ *    - GGRRBB represents the intended color value for the LED(s)
+ *
+ * @param color a 32-bit unsigned integer representing the LED address (if any) and color value.
+ */
 void rgb_put(uint32_t color)
 {
-
-    for (int i=0;i<RGB_LEN; i++){
-        leds[i]=0;
+    const uint8_t n = color >> 24;
+    color = color & 0xffffff; //urgb_u32((color>>16)&0xff,(color>>8)&0xff,color&0xff);
+    if (n < RGB_LEN) {
+        leds[n] = color;
+    } else if (n == 0xff) {
+        rgb_assign_color(0xffffffff, color);
     }
-    leds[DEMO_LED]=color & 0xffffff; //urgb_u32(color>>16,(color>>8)&0xff,color&0xff);
     rgb_send();
-
-};
+}
